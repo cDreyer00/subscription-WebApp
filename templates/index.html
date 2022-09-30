@@ -5,13 +5,11 @@
 <h1>Register</h1>
 <form action="/register" method="post">
     <input name="name" type="text" autofocus autocomplete="off" placeholder="Name...">
-    <select name="sport">
-        <option disabled selected>Sport</option>
-        {% for sport in sports %}
-            <option value="{{ sport }}">{{ sport }}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="Register">
+    {% for sport in sports %}
+    <input style="display: flex; flex-direction: column;" name="sport" type="radio" value="{{ sport }}"> {{ sport }}
+    {% endfor %}
+
+    <p><input type="submit" value="Register"> </p>
 </form>
 
 {% endblock %}
