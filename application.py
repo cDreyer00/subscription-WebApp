@@ -28,11 +28,11 @@ def register():
          return render_template("failure.html", message="Needs Select a valid Sport")
     
     rdb.execute("INSERT INTO registrants (name, sport) VALUES(?, ?)", (name, sport))
-
+    rdb.commit()
     return redirect("/registrants")
 
 @app.route("/registrants")
 
 def registrants():
-    registrants = rdb.execute("SELECT * FROM registrants")
+    registrants = rdb.execute("SELECT * FROM registrants")    
     return render_template("success.html", registrants=registrants)
