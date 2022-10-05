@@ -1,34 +1,45 @@
-import sqlite3
-
+import sqlite3, os
 from flask import Flask, redirect, render_template, request
-
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_DEFAULT_SENDER")
+mail = Mail(app)
 
 rdb = sqlite3.connect('myDatabase.db', check_same_thread=False)
 
-SPORTS = ["Dodgeball", "Flag Football", "Soccer", "Volleyball", "Ultimate Frisbee"]
-
+TEAMS = ["A", "B", "C", "D"]
 
 @app.route('/')
 
 def index():
-
-    return render_template("index.html", sports=SPORTS)
+    print(os.getenv("MAIL_DEFAULT_SENDER"))
+    print(os.getenv("MAIL_PASSWORD"))
+    return render_template("index.html", teams=TEAMS)
 
 
 @app.route('/register', methods=["POST"])
 
 def register():
-    name = request.form.get("name")
-    sport = request.form.get("sport")
-    if not name or not sport:
-        return render_template("failure.html", message="Needs Name" if not name else "Needs Select a valid Sport")
-    if sport not in SPORTS:
+    email = request.form.get("email")
+    team = request.form.get("team")
+
+    if not email or not team:
+        return render_template("failure.html", message="Missing email" if not email else "Needs Select a valid Sport")
+    if team not in TEAMS:
          return render_template("failure.html", message="Needs Select a valid Sport")
     
-    rdb.execute("INSERT INTO registrants (name, sport) VALUES(?, ?)", (name, sport))
+    rdb.execute("INSERT INTO registrants (email, team) VALUES(?, ?)", (email, team))
     rdb.commit()
+
+    message = Message("You are registered in team: " + team, recipients=[email])
+    mail.send(message)
     return redirect("/registrants")
 
 @app.route("/registrants")
